@@ -46,6 +46,10 @@ public class App2 {
     names.forEach(System.out::println);
 
     // Comparator()
+    System.out.println("=== Comparator.reverseOrder() ===");
+    names.sort(Comparator.reverseOrder());
+    names.forEach(System.out::println);
+
     System.out.println("=== Comparator() sort ===");
     names.sort(String::compareTo);
     names.forEach(System.out::println);

@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Period;
+import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -29,6 +30,15 @@ public class Time {
 
   public static void main(String[] args) {
     Instant now = Instant.now();
+
+    ZonedDateTime fluentZonedDateTime = Year.of(2021)
+        .atMonth(10)
+        .atDay(15)
+        .atTime(2, 4)
+        .atZone(ZoneId.systemDefault());
+
+    System.out.println("fluentZonedDateTime = " + fluentZonedDateTime);
+
     System.out.println("now = " + now); // UTC, GMT
     System.out.println("now.atZone(ZoneId.systemDefault()) = " + now.atZone(ZoneId.systemDefault()));
     // System.out.println("ZoneId.getAvailableZoneIds() = " + ZoneId.getAvailableZoneIds());

@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Callable
@@ -53,17 +54,20 @@ public class App3 {
   private static void invokeAll() throws InterruptedException, ExecutionException {
     ExecutorService executorService = Executors.newFixedThreadPool(3);
     Callable<String> callable1 = () -> {
-      Thread.sleep(1000);
+      //Thread.sleep(1000);
+      TimeUnit.SECONDS.sleep(1);
       return "callable1";
     };
 
     Callable<String> callable2 = () -> {
-      Thread.sleep(4000);
+      //Thread.sleep(4000);
+      TimeUnit.SECONDS.sleep(4);
       return "callable2";
     };
 
     Callable<String> callable3 = () -> {
-      Thread.sleep(2000);
+      //Thread.sleep(2000);
+      TimeUnit.SECONDS.sleep(2);
       return "callable3";
     };
 

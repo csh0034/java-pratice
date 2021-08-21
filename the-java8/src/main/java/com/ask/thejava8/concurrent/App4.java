@@ -1,9 +1,11 @@
 package com.ask.thejava8.concurrent;
 
+import java.time.LocalTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Future 로는 하기 어렵던 작업들
@@ -54,18 +56,21 @@ public class App4 {
     // allOf();
 
     // 예외처리
-    exceptionHandle(true);
+    // exceptionHandle(true);
+
+    // practice
+    practice();
   }
 
   private static void supplyAsyncAndThenAccept() throws InterruptedException, ExecutionException {
     // ForkJoinPool 사용하지 않고 Pool 직접 만들기
     ExecutorService executorService = Executors.newFixedThreadPool(4);
     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
-      System.out.println("Hello : " + Thread.currentThread().getName());
+      log("Hello : " + Thread.currentThread().getName());
       return "hello";
     }, executorService).thenAcceptAsync(s -> {
-      System.out.println(Thread.currentThread().getName());
-      System.out.println(s.toUpperCase());
+      log(Thread.currentThread().getName());
+      log(s.toUpperCase());
     }, executorService);
     future.get();
 
@@ -74,14 +79,14 @@ public class App4 {
 
   private static void supplyAsyncAndThenApply() throws InterruptedException, ExecutionException {
     CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
-      System.out.println("Hello : " + Thread.currentThread().getName());
+      log("Hello : " + Thread.currentThread().getName());
       return "hello";
     }).thenApply(s -> {
-      System.out.println(Thread.currentThread().getName());
+      log(Thread.currentThread().getName());
       return s.toUpperCase();
     });
 
-    System.out.println(future.get());
+    log(future.get());
   }
 
   private static void thenCombine() throws InterruptedException, ExecutionException {
@@ -89,7 +94,7 @@ public class App4 {
     CompletableFuture<String> world = getFuture("world");
 
     CompletableFuture<String> future = hello.thenCombine(world, (h, w) -> h + " " + w);
-    System.out.println(future.get());
+    log(future.get());
   }
 
   private static void allOf() throws InterruptedException, ExecutionException {
@@ -103,7 +108,7 @@ public class App4 {
 
   private static CompletableFuture<String> getFuture(String message) {
     return CompletableFuture.supplyAsync(() -> {
-      System.out.println(message + " : " + Thread.currentThread().getName());
+      log(message + " : " + Thread.currentThread().getName());
       return message;
     });
   }
@@ -114,16 +119,36 @@ public class App4 {
         throw  new IllegalStateException("error!!!");
       }
 
-      System.out.println("Hello : " + Thread.currentThread().getName());
+      log("Hello : " + Thread.currentThread().getName());
       return "hello";
     }).handle((result, ex) -> {
       if (ex != null) {
-        System.out.println(ex.getMessage());
+        log(ex.getMessage());
         return "ERROR!!";
       }
       return result;
     });
 
-    System.out.println("future.get() = " + future.get());
+    log("future.get() = " + future.get());
+  }
+
+  private static void practice() throws InterruptedException {
+    CompletableFuture.supplyAsync(() -> {
+      try {
+        TimeUnit.SECONDS.sleep(2);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      log("Hello : " + Thread.currentThread().getName());
+      return "hello!!!!!";
+    }).thenAccept(s -> log("thenAccept : " + s));
+
+    log("main sleep start");
+    TimeUnit.SECONDS.sleep(4);
+    log("main sleep stop");
+  }
+
+  private static void log(String message) {
+    System.out.println(LocalTime.now() + " : " + Thread.currentThread().getName() + " : " + message);
   }
 }

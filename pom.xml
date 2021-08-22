@@ -16,6 +16,7 @@
 
   <modules>
     <module>the-java8</module>
+    <module>the-java-test</module>
   </modules>
 
 </project>

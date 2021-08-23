@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 import java.time.Duration;
 import org.junit.jupiter.api.AfterAll;
@@ -19,6 +21,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.JRE;
+import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * @BeforeAll / @AfterAll   : required static method
@@ -32,7 +41,7 @@ class StudyTest {
 
   @Test
   @DisplayName("스터디 객체 만들기")
-  void create1() {
+  void test1() {
     Study study = new Study(3);
 
     // assertAll 로 감싸면 모든 구문을 확인함
@@ -47,14 +56,15 @@ class StudyTest {
 
   @Test
   @DisplayName("assertThrows test")
-  void create2() {
+  void test2() {
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new Study(-10));
     assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
   }
 
+  @Disabled
   @Test
   @DisplayName("assertTimeout test")
-  void create3() {
+  void test3() {
 
     // supplier 코드가 끝날때 까지 대기함
     // assertTimeout(Duration.ofSeconds(3), () -> new Study(StudyStatus.STARTED), "스터디 객체는 3초안에 생성되어야 한다");
@@ -62,6 +72,45 @@ class StudyTest {
     // supplier 코드가 Duration 보다 오래 걸릴 경우 종료
     // 테스트는 롤백을 기본으로 하지만 해당 supplier 에서 ThreadLocal 을 사용할 경우 공유가 안되므로 DB에 반영 될수도 있음
     assertTimeoutPreemptively(Duration.ofMillis(100), () -> new Study(StudyStatus.STARTED), "스터디 객체는 3초안에 생성되어야 한다");
+  }
+
+  @Test
+  @DisplayName("assumeTrue test")
+  void test4() {
+    assumeTrue("prod".equalsIgnoreCase(System.getProperty("profile")));
+    System.out.println("skip");
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"prod", "local"})
+  @DisplayName("assumingThat test")
+  void test5(String profile) {
+    assumingThat("prod".equalsIgnoreCase(profile), () -> System.out.println("profile : prod"));
+    assumingThat("local".equalsIgnoreCase(profile), () -> System.out.println("profile : local"));
+  }
+
+  @Test
+  @DisplayName("@EnabledOnOs test")
+  @EnabledOnOs(OS.MAC)
+  void test6() {
+    System.out.println("EnabledOnOs OS.MAC");
+  }
+
+  @Test
+  @DisplayName("@DisabledOS test")
+  @DisabledOnOs(OS.WINDOWS)
+  void test7() {
+    System.out.println("DisabledOnOs OS.WINDOWS");
+  }
+
+  @Test
+  @DisplayName("@EnabledForJreRange test")
+  @EnabledForJreRange(min = JRE.JAVA_8, max = JRE.JAVA_11)
+  // @EnabledOnJre(value = {JRE.JAVA_8})
+  // @EnabledIfEnvironmentVariable(named = "TEST", matches = "local")
+  // @EnabledIfSystemProperty(named = "TEST", matches = "local")
+  void test8() {
+    System.out.println("EnabledForJreRange JAVA_8 ~ JAVA_11");
   }
 
   @Disabled

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
@@ -41,6 +42,7 @@ class StudyTest {
 
   @Test
   @DisplayName("스터디 객체 만들기")
+  @Tag("fast")
   void test1() {
     Study study = new Study(3);
 
@@ -56,6 +58,7 @@ class StudyTest {
 
   @Test
   @DisplayName("assertThrows test")
+  @Tag("slow")
   void test2() {
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new Study(-10));
     assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
@@ -113,6 +116,11 @@ class StudyTest {
     System.out.println("EnabledForJreRange JAVA_8 ~ JAVA_11");
   }
 
+  @FastTest
+  void test9() {
+    System.out.println("FastTest");
+  }
+
   @Disabled
   @Test
   void create_skip_test() {
@@ -122,12 +130,12 @@ class StudyTest {
 
   @BeforeAll
   static void beforeAll() {
-    System.out.println("beforeAll");
+    System.out.println("\nbeforeAll\n");
   }
 
   @AfterAll
   static void afterAll() {
-    System.out.println("afterAll");
+    System.out.println("\nafterAll\n");
   }
 
   @BeforeEach

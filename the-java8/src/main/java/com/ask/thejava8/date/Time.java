@@ -1,5 +1,6 @@
 package com.ask.thejava8.date;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 
 /**
  * java.util.Date mutable 하기 때문에 thead safe 하지 않다. type safe 하지 않음
@@ -71,10 +73,11 @@ public class Time {
 
     // Duration 기계용 시간 비교
     Instant instant = Instant.now();
-    Instant plus = now.plus(10, ChronoUnit.SECONDS);
+    Instant plus = instant.plus(371, ChronoUnit.DAYS);
 
     Duration duration = Duration.between(instant, plus);
     System.out.println("duration.getSeconds() = " + duration.getSeconds());
+    System.out.println("duration.toDays() = " + duration.toDays());
 
     LocalDateTime ldt = LocalDateTime.of(2021, Month.JANUARY, 1, 0, 0, 0);
 
@@ -85,6 +88,7 @@ public class Time {
     // LocalDateTime 시간 비교
     System.out.println("ldt.plusDays(1) = " + ldt.plusDays(1));
     System.out.println("ldt.plusYears(10) = " + ldt.plusYears(10));
+    System.out.println("ldt.until(ldt.plusMonths(11), ChronoUnit.DAYS) = " + ldt.until(ldt.plusMonths(11), ChronoUnit.DAYS));
 
     // 파싱 또는 포매팅
     LocalDateTime localDateTimeNow = LocalDateTime.now();
@@ -96,5 +100,18 @@ public class Time {
     System.out.println("yearMonth = " + yearMonth);
     System.out.println("yearMonth.lengthOfMonth() = " + yearMonth.lengthOfMonth());
     System.out.println("yearMonth.atEndOfMonth() = " + yearMonth.atEndOfMonth());
+
+    // DayOfWeek
+    DayOfWeek dayOfWeek1 = DayOfWeek.MONDAY;
+    DayOfWeek dayOfWeek2 = LocalDateTime.now().getDayOfWeek();
+    System.out.println("dayOfWeek1 = " + dayOfWeek1);
+    System.out.println("dayOfWeek2 = " + dayOfWeek2);
+
+    // 요일로 날짜 가져오기
+    LocalDate ld = LocalDate.now();
+    System.out.println("TemporalAdjusters.lastDayOfMonth()) = " + ld.with(TemporalAdjusters.lastDayOfMonth()));
+    System.out.println("TemporalAdjusters.next(DayOfWeek.MONDAY)) = " + ld.with(TemporalAdjusters.next(DayOfWeek.MONDAY)));
+    System.out.println("TemporalAdjusters.dayOfWeekInMonth(2, DayOfWeek.FRIDAY)) = " + ld.with(TemporalAdjusters.dayOfWeekInMonth(2, DayOfWeek.FRIDAY)));
+    System.out.println("TemporalAdjusters.firstInMonth(DayOfWeek.THURSDAY)) = " + ld.with(TemporalAdjusters.firstInMonth(DayOfWeek.THURSDAY)));
   }
 }

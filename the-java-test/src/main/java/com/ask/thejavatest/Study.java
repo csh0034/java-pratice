@@ -1,5 +1,6 @@
 package com.ask.thejavatest;
 
+import com.ask.thejavatest.domain.StudyStatus;
 import java.util.concurrent.TimeUnit;
 
 public class Study {

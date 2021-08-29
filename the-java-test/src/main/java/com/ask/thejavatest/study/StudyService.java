@@ -4,7 +4,7 @@ import com.ask.thejavatest.domain.Member;
 import com.ask.thejavatest.domain.Study;
 import com.ask.thejavatest.member.MemberService;
 
-public class StudyService {
+public class  StudyService {
 
   private final MemberService memberService;
 
@@ -30,4 +30,12 @@ public class StudyService {
 
     return newStudy;
   }
+
+  public Study openStudy(Study study) {
+    study.open();
+    Study openedStudy = repository.save(study);
+    memberService.notify(openedStudy);
+    return openedStudy;
+  }
+
 }

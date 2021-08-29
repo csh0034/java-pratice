@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.ask.thejavatest.domain.Member;
 import com.ask.thejavatest.domain.Study;
+import com.ask.thejavatest.domain.StudyStatus;
 import com.ask.thejavatest.member.MemberService;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -235,6 +236,27 @@ class StudyServiceTest {
       then(memberService).should(never()).validate(any());
 
       then(memberService).shouldHaveNoMoreInteractions();
+    }
+
+    @DisplayName("Mockito 연습")
+    @Test
+    void bdd2() {
+      // given
+      StudyService studyService = new StudyService(memberService, studyRepository);
+      Study study = new Study(10, "더 자바, 테스트");
+
+      given(studyRepository.save(study)).willReturn(study);
+      InOrder inOrder = inOrder(memberService);
+
+      // when
+      studyService.openStudy(study);
+
+      // then
+      assertEquals(StudyStatus.OPENED, study.getStatus());
+      assertNotNull(study.getOpenedDateTime());
+
+      then(memberService).should(atLeastOnce()).notify(study);
+      then(memberService).should(inOrder).notify(study);
     }
   }
 }

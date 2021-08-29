@@ -246,7 +246,6 @@ class StudyServiceTest {
       Study study = new Study(10, "더 자바, 테스트");
 
       given(studyRepository.save(study)).willReturn(study);
-      InOrder inOrder = inOrder(memberService);
 
       // when
       studyService.openStudy(study);
@@ -256,6 +255,8 @@ class StudyServiceTest {
       assertNotNull(study.getOpenedDateTime());
 
       then(memberService).should(atLeastOnce()).notify(study);
+
+      InOrder inOrder = inOrder(memberService);
       then(memberService).should(inOrder).notify(study);
     }
   }

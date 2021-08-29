@@ -118,3 +118,41 @@ class StubbingTest {
   } 
 }
 ```
+
+### **BDD Mockito**
+**BDD**는 애플리케이션이 어떻게 “행동”해야 하는지에 대한 공통된 이해를 구성하는 방법으로, TDD에서 창안했다.  
+행동에 대한 스팩
+- Title
+- Narrative   
+  - As a  / I want / so that
+- Acceptance criteria 
+  - Given / When / Then
+
+```java
+@ExtendWith(MockitoExtension.class)
+class StubbingTest {
+
+  @Mock
+  MemberService memberService;
+
+  @Mock
+  StudyRepository studyRepository;
+  
+  @Test
+  void stubbing() {      
+    // given
+    given(studyRepository.save(study)).willReturn(study);
+    given(studyRepository.save(any())).willReturn(study);
+    given(studyRepository.save(study)).willThrow(IllegalStateException.class);
+
+    // when
+    // 메서드 호출
+
+    // then
+    InOrder inOrder = inOrder(memberService);
+    then(memberService).should(times(1)).notify(study);
+    then(memberService).should(atLeastOnce()).notify(study);
+    then(memberService).should(inOrder).notify(study);
+  } 
+}
+```

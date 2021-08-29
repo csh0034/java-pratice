@@ -3,8 +3,10 @@ package com.ask.thejavatest.study;
 import com.ask.thejavatest.domain.Member;
 import com.ask.thejavatest.domain.Study;
 import com.ask.thejavatest.member.MemberService;
+import org.springframework.stereotype.Service;
 
-public class  StudyService {
+@Service
+public class StudyService {
 
   private final MemberService memberService;
 
@@ -38,4 +40,9 @@ public class  StudyService {
     return openedStudy;
   }
 
+  public Study createSampleStudy() {
+    Study study = new Study(100, "sample-study");
+    study.setId(1L);
+    return study;
+  }
 }

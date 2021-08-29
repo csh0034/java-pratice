@@ -6,12 +6,14 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import lombok.ToString;
 
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class Study {
 
   @Id

@@ -6,6 +6,7 @@ Mock: 진짜 객체와 비슷하게 동작하지만 프로그래머가 직접 �
 Mockito: Mock 객체를 쉽게 만들고 관리하고 검증할 수 있는 방법을 제공한다.
 
 ### **Mock 객체 만들기**
+**@Mock** : mock 객체는 가짜 객체이며 그 안에 메소드 호출해서 사용하려면 반드시 스터빙(stubbing) 해야함
 
 - 메소드로 만들기
     ```java
@@ -14,7 +15,7 @@ Mockito: Mock 객체를 쉽게 만들고 관리하고 검증할 수 있는 방�
       StudyRepository studyRepository = mock(StudyRepository.class);
     }
     ```
-- @Mock 애노테이션으로 만드는 방법 : JUnit 5 extension으로 **MockitoExtension**을 사용해야 한다.
+- @Mock 어노테이션으로 만들기 : JUnit 5 extension으로 **MockitoExtension**을 사용해야 한다.
     1. 필드
         ```java
         @ExtendWith(MockitoExtension.class)
@@ -41,6 +42,33 @@ Mockito: Mock 객체를 쉽게 만들고 관리하고 검증할 수 있는 방�
             }
         }
         ```
+
+**@Spy** : 객체는 진짜 객체이며 메소드 실행 시 스터빙을 하지 않으면 기존 객체의 로직을 실행한 값을, 스터빙을 한 경우엔 스터빙 값을 리턴
+- 메소드로 만들기
+    ```java
+    List<String> spyList = spy(new ArrayList<String>());
+    ```
+
+- @Spy  어노테이션으로 만들기
+    ```java
+    @Spy
+    ArrayList<String> spiedList;
+    ```
+
+**@InjectMocks** : @Mock이나 @Spy 객체를 자신의 멤버 클래스와 일치하면 주입
+- @InjectMocks  어노테이션으로 만들기  
+  *InjectMocks 의 대상의 일부분만 Mocking 하기위해선 @Spy와 같이 사용 해야함
+    ```java
+    //@Spy
+    @InjectMocks
+    StudyService studyService;
+
+    @Mock
+    MemberService memberService;
+
+    @Spy
+    StudyRepository studyRepository;
+    ```
 
 ### **Mock 객체 Stubbing**
 모든 Mock 객체의 행동
@@ -154,5 +182,40 @@ class StubbingTest {
     then(memberService).should(atLeastOnce()).notify(study);
     then(memberService).should(inOrder).notify(study);
   } 
+}
+```
+
+### **Spring boot +  Mockito**
+- **@MockBean** : ApplicationContext에 mock객체를 추가  
+- **@SpyBean** : ApplicationContext에 spy객체를 추가
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+class StudyControllerTest {
+
+  @Autowired
+  MockMvc mockMvc;
+
+  @MockBean
+  private MemberService memberService;
+
+  @SpyBean
+  private StudyService studyService;
+
+  @Test
+  void sampleStudy() throws Exception {
+    // given
+    int limit = 999999;
+
+    Study study = new Study(limit, "sample-study");
+    given(studyService.createSampleStudy()).willReturn(study);
+
+    // when
+    ResultActions result = mockMvc.perform(get("/study"));
+
+    // then
+    result.andDo(print())
+        .andExpect(jsonPath("$.limitCount").value(limit));
+  }
 }
 ```

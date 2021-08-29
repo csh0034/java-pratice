@@ -26,13 +26,16 @@ import com.ask.thejavatest.domain.Member;
 import com.ask.thejavatest.domain.Study;
 import com.ask.thejavatest.domain.StudyStatus;
 import com.ask.thejavatest.member.MemberService;
+import java.util.ArrayList;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +68,78 @@ class StudyServiceTest {
   void createStudyService2(@Mock MemberService memberService, @Mock StudyRepository studyRepository) {
     StudyService studyService = new StudyService(memberService, studyRepository);
     assertNotNull(studyService);
+  }
+
+  @DisplayName("Spy annotation 은")
+  @Nested
+  class SpyAnnotation {
+
+    @Spy
+    ArrayList<String> spiedList;
+
+    @DisplayName("스터빙을 하면 스티빙 값 리턴")
+    @Test
+    void spy1() {
+      spiedList.add("one");
+      spiedList.add("two");
+
+      verify(spiedList).add("one");
+      verify(spiedList).add("two");
+
+      when(spiedList.size()).thenReturn(100);
+      assertEquals(100, spiedList.size());
+    }
+
+    @DisplayName("스터빙을 하지 않으면 기존 로직 실행")
+    @Test
+    void spy2() {
+      spiedList.add("one");
+      spiedList.add("two");
+
+      verify(spiedList).add("one");
+      verify(spiedList).add("two");
+
+      assertEquals(2, spiedList.size());
+    }
+  }
+
+  @DisplayName("InjectMocks annotation 은")
+  @Nested
+  class InjectMocksAnnotation {
+
+    @Spy
+    @InjectMocks
+    StudyService studyService;
+
+    @Mock
+    MemberService memberService;
+
+    @Spy
+    StudyRepository studyRepository;
+
+    @DisplayName("@Mock이나 @Spy로 생성된 mock 객체를 자동으로 주입")
+    @Test
+    void injectMocks() {
+      System.out.println("studyService = " + studyService);
+      System.out.println("memberService = " + memberService);
+      System.out.println("studyRepository = " + studyRepository);
+
+      assertAll(
+          () -> {
+            // 스터빙 X
+            Study sampleStudy = studyService.createSampleStudy();
+            assertEquals(1L, sampleStudy.getId());
+          },
+          () -> {
+            // 스터빙 O
+            Study mockStudy = new Study(10, "MockStudy");
+            when(studyService.createSampleStudy()).thenReturn(mockStudy);
+
+            Study sampleStudy = studyService.createSampleStudy();
+            assertNull(sampleStudy.getId());
+          }
+      );
+    }
   }
 
   @DisplayName("Mock 객체 Stubbing")

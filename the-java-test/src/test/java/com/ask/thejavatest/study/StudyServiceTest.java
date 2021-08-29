@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.atMost;
@@ -23,8 +25,6 @@ import static org.mockito.Mockito.when;
 import com.ask.thejavatest.domain.Member;
 import com.ask.thejavatest.domain.Study;
 import com.ask.thejavatest.member.MemberService;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -135,7 +135,6 @@ class StudyServiceTest {
     @DisplayName("동일한 매개변수로 여러번 호출될 때 다르게 처리")
     @Test
     void stubbing7() {
-
       long id = 1L;
 
       Member member = new Member();
@@ -157,7 +156,6 @@ class StudyServiceTest {
     @DisplayName("createNewStudy stubbing 연습")
     @Test
     void stubbing8() {
-
       StudyService studyService = new StudyService(memberService, studyRepository);
       assertNotNull(studyService);
 
@@ -179,7 +177,6 @@ class StudyServiceTest {
     @DisplayName("verify, verifyNoMoreInteractions, inOrder, timeout 검증")
     @Test
     void stubbing9() {
-
       StudyService studyService = new StudyService(memberService, studyRepository);
       assertNotNull(studyService);
 
@@ -211,6 +208,33 @@ class StudyServiceTest {
       verifyNoMoreInteractions(memberService);
 
       verify(memberService, timeout(5000).atLeastOnce()).notify(study);
+    }
+
+    @DisplayName("Mockito Bdd Style")
+    @Test
+    void bdd() {
+      // given
+      StudyService studyService = new StudyService(memberService, studyRepository);
+      assertNotNull(studyService);
+
+      Member member = new Member();
+      member.setId(1L);
+      member.setEmail("test@naver.com");
+
+      Study study = new Study(10, "테스트");
+
+      given(memberService.findById(1L)).willReturn(member);
+      given(studyRepository.save(study)).willReturn(study);
+
+      // when
+      studyService.createNewStudy(1L, study);
+
+      // then
+      then(memberService).should(times(1)).notify(study);
+      then(memberService).should(atLeastOnce()).notify(member);
+      then(memberService).should(never()).validate(any());
+
+      then(memberService).shouldHaveNoMoreInteractions();
     }
   }
 }

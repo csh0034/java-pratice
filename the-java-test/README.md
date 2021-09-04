@@ -142,7 +142,7 @@ void test3() {
 }
 ```
 
-##Junit 5 테스트 반복하기
+## Junit 5 테스트 반복하기
 **@RepeatedTest**
 - 반복 횟수와 반복 테스트 이름을 설정할 수 있다.
   - {displayName}

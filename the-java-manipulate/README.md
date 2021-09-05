@@ -94,3 +94,61 @@ JVM 언어
 
 ***  
 ## 바이트 코드 조작
+
+**Jacoco plugin** 을 사용하여 코드 커버리지 측정
+
+``` shell
+$ mvn clean verify
+```
+pom.xml
+```xml
+<build>
+  <plugins>
+    <!-- mvn test 실행하기 위해선 추가해야함 -->
+    <plugin>
+      <artifactId>maven-surefire-plugin</artifactId>
+      <version>2.22.0</version>
+    </plugin>
+    <plugin>
+      <groupId>org.jacoco</groupId>
+      <artifactId>jacoco-maven-plugin</artifactId>
+      <version>0.8.4</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>prepare-agent</goal>
+          </goals>
+        </execution>
+        <execution>
+          <id>report</id>
+          <phase>prepare-package</phase>
+          <goals>
+            <goal>report</goal>
+          </goals>
+        </execution>
+        <execution>
+          <id>jacoco-check</id>
+          <goals>
+            <goal>check</goal>
+          </goals>
+          <configuration>
+            <rules>
+              <rule>
+                <element>PACKAGE</element>
+                <limits>
+                  <limit>
+                    <counter>LINE</counter>
+                    <value>COVEREDRATIO</value>
+                    <minimum>0.30</minimum><!-- 코드 커버리지 통과 비율을 설정 -->
+                  </limit>
+                </limits>
+              </rule>
+            </rules>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
+

@@ -74,7 +74,7 @@ JVM 언어
 - 로딩
   - 클래스 로더가 .class 파일을 읽고 그 내용에 따라 적절한 바이너리 데이터를 만들고 “메소드” 영역에 저장.
   - 이때 메소드 영역에 저장하는 데이터
-    - FQCN
+    - FQCN (Fully Qualified Class Name))
     - 클래스 | 인터페이스 | enum
     - 메소드와 변수
   - 로딩이 끝나면 해당 클래스 타입의 Class 객체를 생성하여 “힙" 영역에 저장.
@@ -95,11 +95,13 @@ JVM 언어
 ***  
 ## 바이트 코드 조작
 
-**Jacoco plugin** 을 사용하여 코드 커버리지 측정
+### 1. Jacoco plugin 을 사용하여 코드 커버리지 측정  
+Java code coverage의 약자로 junit 테스트의 결과를 바탕으로 커버리지를 결과를 리포트 해주는 툴
 
 ``` shell
 $ mvn clean verify
 ```
+
 pom.xml
 ```xml
 <build>
@@ -151,4 +153,106 @@ pom.xml
   </plugins>
 </build>
 ```
+
+***
+### 2. 바이트 코드 조작 라이브러리
+- ASM: https://asm.ow2.io/
+- Javassist: https://www.javassist.org/
+- ByteBuddy: https://bytebuddy.net/#/
+
+```xml
+<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
+<dependency>
+    <groupId>net.bytebuddy</groupId>
+    <artifactId>byte-buddy</artifactId>
+    <version>1.11.13</version>
+</dependency>
+```
+
+```java
+public class Moja {
+  public String pullOut() throws IOException {
+    new ByteBuddy().redefine(Moja.class)
+        .method(named("pullOut")).intercept(FixedValue.value("Rabbit!"))
+        .make().saveIn(new File("{프로젝트 경로}/target/classes/"));
+    return "";
+  }
+}
+
+public class App {
+  public static void main(String[] args) {
+    System.out.println(new Moja().pullOut());
+  }
+}
+```
+***
+### 3. Javaagent 사용하기  
+public static void premain, maven-jar-plugin 를 이용하여 jar 생성 후에  
+VM 옵션으로 javaagent 값을 해당 jar 경로로 추가하면 바이트코드 조작가능
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-jar-plugin</artifactId>
+  <version>3.1.2</version>
+  <configuration>
+    <archive>
+      <index>true</index>
+      <manifest>
+        <addClasspath>true</addClasspath>
+      </manifest>
+      <manifestEntries>
+        <mode>development</mode>
+        <url>${project.url}</url>
+        <key>value</key>
+        <Premain-Class>com.ask.thejavamanipulate.agent.Agent</Premain-Class>
+        <Can-Redefine-Classes>true</Can-Redefine-Classes>
+        <Can-Retransform-Classes>true</Can-Retransform-Classes>
+      </manifestEntries>
+    </archive>
+  </configuration>
+</plugin>
+```
+
+```java
+public class Agent {
+
+  public static void premain(String agentArgs, Instrumentation inst) {
+    new AgentBuilder.Default()
+        .type(ElementMatchers.any())
+        .transform((builder, typeDescription, classLoader, javaModule) -> builder.method(named("pullOutAgent"))
+            .intercept(FixedValue.value("Rabbit!"))).installOn(inst);
+  }
+
+}
+```
+
+VM 옵션에 추가
+```shell
+-javaagent:{프로젝트 경로}/target/the-java-manipulate-1.0-SNAPSHOT.jar
+```
+
+***
+### 4. 바이트코드 조작 정리
+프로그램 분석
+- 코드에서 버그 찾는 툴
+- 코드 복잡도 계산
+
+클래스 파일 생성
+- 프록시
+- 특정 API 호출 접근 제한
+- 스칼라 같은 언어의 컴파일러  
+
+그밖에도 자바 소스 코드 건리지 않고 코드 변경이 필요한 여러 경우에 사용할 수 있다.
+- 프로파일러 (newrelic)
+- 최적화
+- 로깅
+- ...
+
+스프링이 컴포넌트 스캔을 하는 방법 (asm)
+- 컴포넌트 스캔으로 빈으로 등록할 후보 클래스 정보를 찾는데 사용
+- ClassPathScanningCandidateComponentProvider -> SimpleMetadataReader
+- ClassReader와 Visitor 사용해서 클래스에 있는 메타 정보를 읽어온다.  
+  
+ASM, Javassist, ByteBuddy, CGlib
 

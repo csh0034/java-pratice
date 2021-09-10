@@ -256,3 +256,81 @@ VM 옵션에 추가
   
 ASM, Javassist, ByteBuddy, CGlib
 
+***
+## 리플렉션
+
+### 1. 리플렉션 API 클래스 정보 조회  
+리플렉션이란 객체를 통해 클래스의 정보를 분석해 내는 프로그램 기법을 말한다.  
+애플리케이션의 런타임 동작을 검사하거나 수정할 수 있는 기능이 필요한 프로그램에서 사용된다.
+
+```java
+public class App {
+
+  public static void main(String[] args) throws Exception {
+    // 클래스를 가져오는 방법1
+    Class<Book> bookClass = Book.class;
+
+    // 클래스를 가져오는 방법2
+    Class<? extends Book> bookClass2 = book.getClass();
+
+    // 클래스를 가져오는 방법3 FQCN
+    Class<?> bookClass3 = Class.forName("com.ask.thejavamanipulate.reflection.Book");
+
+    System.out.println("bookClass = " + bookClass);
+    System.out.println("bookClass2 = " + bookClass2);
+    System.out.println("bookClass3 = " + bookClass3);
+    
+    Book book = new Book();
+
+    // 필드 출력 bookClass.getFileds() 사용시 public 만 나옴
+    Arrays.stream(bookClass.getDeclaredFields())
+        .forEach(System.out::println);
+
+    // 필드 값 출력
+    Arrays.stream(bookClass.getDeclaredFields())
+        .forEach(f -> {
+          try {
+            f.setAccessible(true);  // public 이외 접근 가능하게함
+            System.out.printf("%s : %s\n", f, f.get(book));
+          } catch (IllegalAccessException e) {
+            e.printStackTrace();
+          }
+        });
+
+    // 생성자 출력
+    Arrays.stream(bookClass.getDeclaredConstructors())
+        .forEach(c -> {
+          c.setAccessible(true);
+          System.out.printf("%s\n", c);
+        });
+
+    // 메서드 출력
+    Arrays.stream(bookClass.getDeclaredMethods())
+        .forEach(m -> {
+          try {
+            m.setAccessible(true);
+            System.out.printf("%s : %s\n", m, m.invoke(book));
+          } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+          }
+        });
+    
+    // 상속, 구현 인터페이스
+    System.out.println("bookClass.getSuperclass() = " + bookClass.getSuperclass());
+    Arrays.stream(bookClass.getInterfaces()).forEach(i -> System.out.println(i.getName()));
+    System.out.println("");
+
+    // 필드 정보 출력
+    Arrays.stream(bookClass.getDeclaredFields())
+        .forEach(f -> {
+          int modifiers = f.getModifiers();
+          System.out.println(f);
+          System.out.println("isFinal = " + Modifier.isFinal(modifiers));
+          System.out.println("isPublic = " + Modifier.isPublic(modifiers));
+          System.out.println("isPrivate = " + Modifier.isPrivate(modifiers));
+          System.out.println("");
+        });
+  }
+  
+}
+```

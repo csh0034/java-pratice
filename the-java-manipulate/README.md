@@ -318,7 +318,6 @@ public class App {
     // 상속, 구현 인터페이스
     System.out.println("bookClass.getSuperclass() = " + bookClass.getSuperclass());
     Arrays.stream(bookClass.getInterfaces()).forEach(i -> System.out.println(i.getName()));
-    System.out.println("");
 
     // 필드 정보 출력
     Arrays.stream(bookClass.getDeclaredFields())
@@ -331,6 +330,51 @@ public class App {
           System.out.println("");
         });
   }
-  
+}
+```
+***
+## 2. 애노테이션과 리플렉션  
+중요 애노테이션
+- @Retention: 해당 애노테이션을 언제까지 유지할 것인가?
+  - SOURCE : 소스 코드(.java)까지 남아있는다.
+  - CLASS : 클래스 파일(.class)까지 남아있는다.(=바이트 코드), 클래스로더가 해당 클래스를 읽어오면 사라진다.
+  - RUNTIME : 런타임까지 남아있는다.
+- @Target: 어디에 사용할 수 있는가?
+- @Inherit: 해당 애노테이션을 하위 클래스까지 전달할 것인가?
+
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.FIELD})
+@Inherited
+public @interface BookAnnotation {
+  String value();
+  String name() default "ask";
+  int number() default 100;
+}
+```
+
+```java
+public class App {
+
+  public static void main(String[] args) {
+
+    // 상속받은 (@Inherit) 애노테이션까지 조회
+    Arrays.stream(bookClass.getAnnotations()).forEach(System.out::println);
+    
+    // 자기 자신에만 붙어있는 애노테이션 조회
+    Arrays.stream(bookClass.getDeclaredAnnotations()).forEach(System.out::println);
+    
+    // 어노테이션 정보 출력
+    Arrays.stream(bookClass.getAnnotations())
+        .peek(annotation -> {
+          if (annotation instanceof BookAnnotation) {
+            BookAnnotation bookAnnotation = (BookAnnotation) annotation;
+            System.out.println("number() = " + bookAnnotation.number());
+            System.out.println("name() = " + bookAnnotation.name());
+            System.out.println("value() = " + bookAnnotation.value());
+          }
+        })
+        .forEach(System.out::println);
+  }
 }
 ```

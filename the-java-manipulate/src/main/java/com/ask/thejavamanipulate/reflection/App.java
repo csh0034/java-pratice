@@ -70,6 +70,20 @@ public class App {
           System.out.println("isPrivate = " + Modifier.isPrivate(modifiers));
           System.out.println("");
         });
+
+    // annotation 정보 출력
+    Arrays.stream(bookClass.getAnnotations())
+        .peek(annotation -> {
+          if (annotation instanceof BookAnnotation) {
+            BookAnnotation bookAnnotation = (BookAnnotation) annotation;
+            System.out.println("number() = " + bookAnnotation.number());
+            System.out.println("name() = " + bookAnnotation.name());
+            System.out.println("value() = " + bookAnnotation.value());
+          }
+        })
+        .forEach(System.out::println);
+
+
     System.out.println("");
   }
   

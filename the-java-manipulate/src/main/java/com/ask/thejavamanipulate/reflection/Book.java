@@ -1,5 +1,6 @@
 package com.ask.thejavamanipulate.reflection;
 
+@BookAnnotation("abcd")
 public class Book extends AbstractBook implements BookInterfaceA, BookInterfaceB {
 
   private String a = "a";

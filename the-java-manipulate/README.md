@@ -333,7 +333,7 @@ public class App {
 }
 ```
 ***
-## 2. 애노테이션과 리플렉션  
+### 2. 애노테이션과 리플렉션  
 중요 애노테이션
 - @Retention: 해당 애노테이션을 언제까지 유지할 것인가?
   - SOURCE : 소스 코드(.java)까지 남아있는다.
@@ -378,3 +378,58 @@ public class App {
   }
 }
 ```
+
+***
+### 3. 리플렉션 API 클래스 정보 수정 또는 실행 
+Class 인스턴스 만들기
+- 생성자를 통해서 만들어야 한다.
+- Constructor.newInstance(params)
+
+필드 값 접근하기/설정하기
+- 특정 인스턴스가 가지고 있는 값을 가져오는 것이기 때문에 인스턴스가 필요하다.
+- Field.get(object)
+- Filed.set(object, value)
+- Static 필드를 가져올 때는 object가 없어도 되니까 null을 넘기면 된다.
+
+메소드 실행하기
+- Object Method.invoke(object, params)
+
+```java
+
+public class App {
+
+  public static void main(String[] args)
+      throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+    Class<Book> bookClass = Book.class;
+    
+    // 생성자를 통한 객체 생성 1
+    Constructor<Book> constructor = bookClass.getConstructor();
+    Book book = constructor.newInstance();
+    System.out.println("book = " + book);
+
+    // 생성자를 통한 객체 생성 2
+    Constructor<Book> constructor2 = bookClass.getConstructor(String.class);
+    Book book2 = constructor2.newInstance("myBook");
+    System.out.println("book2 = " + book2);
+    
+    // 필드 조회후 출력
+    Field b = Book.class.getDeclaredField("B");
+    b.setAccessible(true);
+    System.out.println("b = " + b.get(null));
+    
+    // 필드 값 변경
+    b.set(null, "BBBBBBBBB");
+    System.out.println("b = " + b.get(null));
+
+    // 메서드 실행 1
+    Method g = Book.class.getDeclaredMethod("g");
+    g.invoke(book);
+
+    // 메서드 실행 2
+    Method sum = Book.class.getDeclaredMethod("sum", int.class, int.class);
+    Object invoke = sum.invoke(book, 1, 2);
+    System.out.println("sum : " + invoke);
+  }
+}
+```
+

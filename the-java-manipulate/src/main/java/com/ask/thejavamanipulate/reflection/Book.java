@@ -16,6 +16,10 @@ public class Book extends AbstractBook implements BookInterfaceA, BookInterfaceB
   public Book() {
   }
 
+  public Book(String a) {
+    this.a = a;
+  }
+
   public Book(String a, String d, String e) {
     this.a = a;
     this.d = d;
@@ -32,5 +36,18 @@ public class Book extends AbstractBook implements BookInterfaceA, BookInterfaceB
 
   public int h() {
     return 1;
+  }
+
+  public int sum(int left, int right) {
+    return left + right;
+  }
+
+  @Override
+  public String toString() {
+    return "Book{" +
+        "a='" + a + '\'' +
+        ", d='" + d + '\'' +
+        ", e='" + e + '\'' +
+        '}';
   }
 }

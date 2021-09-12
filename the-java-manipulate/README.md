@@ -432,4 +432,48 @@ public class App {
   }
 }
 ```
+***
+### 4. DI 프레임워크 만들기  
+@Inject 라는 애노테이션 만들어서 필드 주입 해주는 컨테이너 서비스 만들기
+
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface Inject {
+}
+```
+```java
+public class ContainerService {
+
+  public static <T> T getObject(Class<T> classType) {
+    T instance = createInstance(classType);
+
+    // 인스턴스 생성시 필드에 @Inject 있을 경우 해당 필드의 인스턴스 생성 맟 주입
+    Arrays.stream(classType.getDeclaredFields()).forEach(f -> {
+      if (f.getAnnotation(Inject.class) != null) {
+        Object filedInstance = createInstance(f.getType());
+        f.setAccessible(true);
+
+        try {
+          f.set(instance, filedInstance);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+
+    return instance;
+  }
+
+  // 인스턴스 생성
+  private static <T> T createInstance(Class<T> classType) {
+    try {
+      return classType.getConstructor().newInstance();
+    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+}
+```
 

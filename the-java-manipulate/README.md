@@ -504,6 +504,7 @@ public class ContainerService {
   제공할 때 이런 패턴을 주로 사용한다.
 
 ```java
+// 컴파일 타임에 프록시가 존재함
 public class BookServiceProxy implements BookService {
 
   private BookService bookService;
@@ -517,5 +518,28 @@ public class BookServiceProxy implements BookService {
     System.out.println("proxy");
     bookService.print(book);
   }
+}
+```
+
+***
+### 2. 다이나믹 프록시  
+런타임에 특정 인터페이스들을 구현하는 클래스 또는 인스턴스를 만드는 기술
+- 유연한 구조가 아니며 클래스일 경우 프록시 생성 못함
+- Object Proxy.newProxyInstance(ClassLoader, Interfaces, InvocationHandler)
+
+```java
+// 런타임에 인터페이스 기반 프록시 생성
+class BookServiceTest {
+  
+  BookService bookService = (BookService) Proxy.newProxyInstance(BookService.class.getClassLoader(),
+      new Class[]{BookService.class},
+      new InvocationHandler() {
+        private final BookService bookService = new BookServiceImpl();
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          System.out.println("dynamic proxy");
+          return method.invoke(bookService, args);
+        }
+      });
 }
 ```

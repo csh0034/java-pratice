@@ -24,6 +24,12 @@
       <artifactId>byte-buddy</artifactId>
       <version>1.11.13</version>
     </dependency>
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
+      <version>3.3.0</version>
+    </dependency>
+
   </dependencies>
 
   <build>

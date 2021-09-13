@@ -530,16 +530,91 @@ public class BookServiceProxy implements BookService {
 ```java
 // 런타임에 인터페이스 기반 프록시 생성
 class BookServiceTest {
-  
-  BookService bookService = (BookService) Proxy.newProxyInstance(BookService.class.getClassLoader(),
-      new Class[]{BookService.class},
-      new InvocationHandler() {
-        private final BookService bookService = new BookServiceImpl();
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-          System.out.println("dynamic proxy");
-          return method.invoke(bookService, args);
-        }
-      });
+
+  @DisplayName("jdk dynamic proxy 메서드 호출")
+  @Test
+  void proxy() {
+    BookService bookService = (BookService) Proxy.newProxyInstance(BookService.class.getClassLoader(), new Class[]{BookService.class},
+        new InvocationHandler() {
+          private final BookService bookService = new BookServiceImpl();
+          @Override
+          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            System.out.println("jdk dynamic proxy");
+            return method.invoke(bookService, args);
+          }
+        });
+
+    bookService.print(new Book("BookName"));
+  }
 }
 ```
+
+***
+### 3. 클래스의 프록시 생성  
+서브 클래스를 만들 수 있는 라이브러리를 사용하여 프록시를 만들 수 있다.
+- 상속을 사용하지 못하는 경우 프록시를 만들 수 없다.
+  - Private 생성자만 있는 경우
+  - Final 클래스인 경우
+- 인터페이스가 있을 때는 인터페이스의 프록시를 만들어 사용해야 함
+
+
+CGlib
+- 스프링, 하이버네이트가 사용하는 라이브러리
+- 버전 호환성이 좋치 않아서 서로 다른 라이브러리 내부에 내장된 형태로 제공되기도 한다.
+
+```java
+class BookServiceTest {
+
+  @DisplayName("CGlib proxy 메서드 호출")
+  @Test
+  void proxy() {
+    MethodInterceptor handler = new MethodInterceptor() {
+      private final BookServiceImpl bookServiceImpl = new BookServiceImpl();
+      @Override
+      public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+        System.out.println("CGlib proxy");
+        return method.invoke(bookServiceImpl, objects);
+      }
+    };
+
+    BookServiceImpl bookServiceImpl = (BookServiceImpl) Enhancer.create(BookServiceImpl.class, handler);
+    bookServiceImpl.print(new Book("BookName"));
+  }
+}
+```
+
+ByteBuddy
+- 바이트 코드 조작 뿐 아니라 런타임(다이나믹) 프록시를 만들 때도 사용할 수 있다.
+
+```java
+class BookServiceTest {
+  
+  @DisplayName("ByteBuddy proxy 메서드 호출")
+  @Test
+  void proxy() throws Exception {
+    Class<? extends BookServiceImpl> proxyClass = new ByteBuddy().subclass(BookServiceImpl.class)
+        .method(any()).intercept(InvocationHandlerAdapter.of(new InvocationHandler() {
+          private final BookServiceImpl bookServiceImpl = new BookServiceImpl();
+
+          @Override
+          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            System.out.println("ByteBuddy proxy");
+            return method.invoke(bookServiceImpl, args);
+          }
+        }))
+        .make().load(BookServiceImpl.class.getClassLoader()).getLoaded();
+
+    BookServiceImpl bookServiceImpl = proxyClass.getConstructor().newInstance();
+    bookServiceImpl.print(new Book("BookName"));
+  }
+}
+```
+
+***
+### 4. 다이나믹 프록시 정리  
+런타임에 인터페이스 또는 클래스의 프록시 인스턴스 또는 클래스를 만들어 사용하는 프로그래밍 기법
+- 스프링 데이터 JPA
+- 스프링 AOP
+- Mockito
+- 하이버네이트 lazy initialization
+- ...

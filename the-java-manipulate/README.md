@@ -491,3 +491,31 @@ public class ContainerService {
 하이버네이트
 - @Entity 클래스에 Setter가 없다면 리플렉션을 사용한다.
 
+***
+## 다이나믹 프록시
+
+### 1. 프록시 패턴  
+![04.png](./images/04.png)
+
+- 프록시와 리얼 서브젝트가 공유하는 인터페이스가 있고, 클라이언트는 해당 인터페이스 타입으로 프록시를 사용한다.
+- 클라이언트는 프록시를 거쳐서 리얼 서브젝트를 사용하기 때문에 프록시는 리얼 서브젝트에 대한 접근을 관리거나  
+  부가기능을 제공하거나, 리턴값을 변경할 수도 있다.
+- 리얼 서브젝트는 자신이 해야 할 일만 하면서(SRP) 프록시를 사용해서 부가적인 기능(접근 제한, 로깅, 트랜잭션, 등)을  
+  제공할 때 이런 패턴을 주로 사용한다.
+
+```java
+public class BookServiceProxy implements BookService {
+
+  private BookService bookService;
+
+  public BookServiceProxy(BookService bookService) {
+    this.bookService = bookService;
+  }
+
+  @Override
+  public void print(Book book) {
+    System.out.println("proxy");
+    bookService.print(book);
+  }
+}
+```

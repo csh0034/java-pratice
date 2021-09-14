@@ -340,6 +340,16 @@ public class App {
   - CLASS : 클래스 파일(.class)까지 남아있는다.(=바이트 코드), 클래스로더가 해당 클래스를 읽어오면 사라진다.
   - RUNTIME : 런타임까지 남아있는다.
 - @Target: 어디에 사용할 수 있는가?
+  - TYPE, //class, interface, enum 등에 애노테이션을 지정할 때
+  - FIELD, //멤버변수에 애노테이션을 지정할 때
+  - METHOD, //메소드에 애노테이션을 지정할 때
+  - PARAMETER, //매개변수에 애노테이션을 지정할 때
+  - CONSTRUCTOR, //생성자에 애노테이션을 지정할 때
+  - LOCAL_VARIABLE, //지역 변수 애노테이션을 지정할 때
+  - ANNOTATION_TYPE, //애노테이션타입에 애노테이션을 지정할 때
+  - PACKAGE, //패키지에 애노테이션을 지정할 때
+  - TYPE_PARAMETER, //매개변수 타입에 애노테이션을 지정할 때
+  - TYPE_USE; //타입 사용시에 애노테이션을 지정할 때
 - @Inherit: 해당 애노테이션을 하위 클래스까지 전달할 것인가?
 
 ```java
@@ -618,3 +628,56 @@ class BookServiceTest {
 - Mockito
 - 하이버네이트 lazy initialization
 - ...
+
+***
+## 애노테이션 프로세서
+
+### 1. Lombok(롬복)  
+@Getter, @Setter, @Builder 등의 애노테이션과 애노테이션 프로세서를 제공하여 표준적으로  
+작성해야 할 코드, 반복해서 재사용 해야 하는 코드(boilerplate code) 를 개발자 대신 생성해주는 라이브러리.
+
+> IntelliJ lombok 플러그인 설치  
+> IntelliJ Annotation Processing 옵션 활성화
+
+pom.xml
+```xml
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.8</version>
+    <scope>provided</scope>
+</dependency>
+```
+
+롬복 동작 원리   
+컴파일 시점에 애노테이션 프로세서를 사용하여 소스코드의 AST(abstract syntax tree)를 조작한다.
+
+이슈 사항  
+- 공개된 API가 아닌 컴파일러 내부 클래스를 사용하여 기존 소스 코드를 조작한다.  
+- 특히 이클립스의 경우엔 java agent를 사용하여 컴파일러 클래스까지 조작하여 사용한다.   
+  해당 클래스들 역시 공개된 API가 아니다보니 버전 호환성에 문제가 생길 수 있고 언제라도  
+  그런 문제가 발생해도 이상하지 않다.
+- 그럼에도 불구하고 엄청난 편리함 때문에 널리 쓰이고 있으며 대안이 몇가지 있지만 롬복의 모든 기능과 편의성을 대체하진 못한다.
+  - [AutoValue](https://github.com/google/auto/blob/master/value/userguide/index.md)
+  - [Immutables](https://immutables.github.io)
+
+***
+### 2. 애노테이션 프로세서 정리  
+애노테이션 프로세서는 컴파일 시점에 끼어들어 특정한 애노테이션이 붙어있는 소스코드를 참조해서 새로운 소스코드를 만들어 낼 수 있는 기능이다.  
+애노테이션이 붙어있는 소스코드의 정보를 트리구조(AST)로 참조한다.  
+
+**동작 순서**
+1. 자바 컴파일러가 컴파일을 수행한다.. (자바 컴파일러는 애노테이션 프로세서에 대해 미리 알고 있어야 한다.)
+2. 실행되지 않은 애노테이션 프로세서들을 수행합니다. (각각의 프로세서는 모두 각자에 역할에 맞는 구현이 되어있어야한다.)
+3. 프로세서 내부에서 애노테이션이 달린 Element(변수, 메소드, 클래스 등)들에 대한 처리를 한다. (보통 이곳에서 자바 클래스를 생성한다.)
+4. 컴파일러가 모든 애노테이션 프로세서가 실행되었는지 확인하고, 그렇지 않다면 반복해서 위 작업을 수행합니다.
+
+***
+## 마무리  
+- VM 구조
+- 바이트 코드 조작 - ASM 또는 Javassist, ByteBuddy
+- 리플렉션 API - 클래스 정보 참조 (메소드, 필드, 생성자, ...)
+- 다이나믹 프록시 기법 - Proxy, CGlib, ByteBuddy
+- 애노테이션 프로세서 - AbstractProcessor, Filer, ..., AutoService, Javapoet
+
+

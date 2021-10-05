@@ -15,10 +15,18 @@ JUnit은 자바 프로그래밍 언어용 유닛 테스트 프레임워크이다
 
 <!-- 단독으로 사용시 -->
 <dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter-engine</artifactId>
-    <version>5.7.2</version>
-    <scope>test</scope>
+  <groupId>org.junit.jupiter</groupId>
+  <artifactId>junit-jupiter-engine</artifactId>
+  <version>5.7.2</version>
+  <scope>test</scope>
+</dependency>
+
+<!-- Mock Static Class Test -->
+<dependency>
+  <groupId>org.mockito</groupId>
+  <artifactId>mockito-inline</artifactId>
+  <version>3.9.0</version>
+  <scope>test</scope>
 </dependency>
 ```
 
@@ -464,6 +472,46 @@ class StubbingTest {
     then(memberService).should(atLeastOnce()).notify(study);
     then(memberService).should(inOrder).notify(study);
   } 
+}
+```
+
+## MockedStatic mockito-inline
+Mockito를 이용하여서도 static method를 테스트
+```java
+@DisplayName("static mock test")
+@Slf4j
+class RandomUtilsTest {
+
+  @DisplayName("try with resources block (Mock scope) 활용")
+  @Test
+  void staticMockito() {
+
+    // before mock scope
+    assertThat(StringUtils.returnString("before-val")).startsWith("returnString : before-val");
+
+    try (MockedStatic<StringUtils> mock = Mockito.mockStatic(StringUtils.class)) {
+      // given
+      String paramValue = "param!!!!";
+      String returnValue = "return!!!!";
+
+      mock.when(() -> StringUtils.returnString(paramValue)).thenReturn(returnValue);
+
+      // when
+      String returnValue1 = StringUtils.returnString(paramValue);
+      String returnValue2 = StringUtils.returnString("A");
+      String returnValue3 = StringUtils.returnString("B");
+
+      // then
+      mock.verify(() -> StringUtils.returnString(anyString()), times(3));
+
+      log.info("returnValue1 : {}", returnValue1);
+      log.info("returnValue2 : {}", returnValue2);
+      log.info("returnValue3 : {}", returnValue3);
+    }
+
+    // after mock scope
+    assertThat(StringUtils.returnString("after-val")).startsWith("returnString : after-val");
+  }
 }
 ```
 

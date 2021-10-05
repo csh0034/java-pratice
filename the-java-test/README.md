@@ -475,7 +475,7 @@ class StubbingTest {
 }
 ```
 
-## MockedStatic mockito-inline
+## [MockedStatic mockito-inline](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#48)
 Mockito를 이용하여서도 static method를 테스트
 ```java
 @DisplayName("static mock test")
